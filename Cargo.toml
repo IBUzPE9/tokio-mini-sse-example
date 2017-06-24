@@ -1,0 +1,12 @@
+[package]
+name = "tokio-transp"
+version = "0.1.0"
+authors = ["Alex <alex@drop.it>"]
+
+[dependencies]
+futures="*"
+tokio-core="*"
+tokio-io="*"
+tokio-service="*"
+tokio-minihttp={ git = "https://github.com/tokio-rs/tokio-minihttp" }
+bytes="*"
