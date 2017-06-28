@@ -16,7 +16,7 @@
       evtSource.addEventListener("userconnect", function(e) {
           var sseMsgDiv = document.getElementById('sse-msg');
           const obj = JSON.parse(e.data);
-          sseMsgDiv.innerHTML += '<p>' + obj.username + " : " + obj.status + '</p>';
+          sseMsgDiv.innerHTML += '<p>' + obj.username + " " + obj.status + '</p>';
           console.log(obj);
       }, false);
     </script>
