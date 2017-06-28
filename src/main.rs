@@ -78,14 +78,13 @@ fn main() {
                                                         if cnt != 0 {
                                                             Ok(Loop::Continue((stream, cnt-1, buf)))
                                                         }else{
-                                                            Ok(Loop::Break((stream, cnt-1, buf)))
+                                                            Ok(Loop::Break(()))
                                                         }                                                    
                                                     )                                                    
                                             })  
 
                                     )
                                 )
-                                .map(|_| ())
                         ),
                         _ =>  {
                             let mut resp = Response::new();
