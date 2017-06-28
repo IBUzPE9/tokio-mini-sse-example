@@ -57,17 +57,15 @@ fn main() {
     let listener = TcpListener::bind(&remote_addr, &handle).unwrap();
 
     let server = listener.incoming().for_each(|(socket, _)| {
-        let transport = socket.framed(HttpCodec);
-        println!("get connection");
-        transport.into_future()
+        socket.framed(HttpCodec).into_future()
             .map_err(|(e, _)| e)
-            .and_then(|(req, transport)| {
+            .and_then(|(req, transport)| 
                 match req {
                     Some(req) => match req.path() {
                         "/" => Case::A(
                             tokio_io::io::write_all(transport.into_inner(), SSE_RESP)
-                                .and_then(|(stream,_)|{
-                                    loop_fn((stream, 9), |(stream, cnt)|{
+                                .and_then(|(stream,_)|
+                                    loop_fn((stream, 9), |(stream, cnt)|
                                         Timeout::new(Duration::from_secs(2), rht).unwrap()
                                             .map(move |_| (stream, cnt))
                                             .and_then(|(stream, cnt)|{
@@ -77,17 +75,17 @@ fn main() {
                                                 let mut buf = String::new();
                                                 write!(buf, "event: userconnect\ndata: {{\"username\": \"{}\", \"status\": \"{}\"}}\n\n", LOTR_CHARS[char], LOTR_DEEDS[deed]).unwrap();
                                                 tokio_io::io::write_all(stream, buf.into_bytes())
-                                                    .and_then(move |(stream, _)|{
+                                                    .and_then(move |(stream, _)|
                                                         if cnt != 0 {
                                                             Ok(Loop::Continue((stream, cnt-1)))
                                                         }else{
                                                             Ok(Loop::Break((stream, cnt-1)))
                                                         }                                                    
-                                                    })                                                    
+                                                    )                                                    
                                             })  
 
-                                    })
-                                })
+                                    )
+                                )
                                 .map(|(_, _)| {println!("all msgs sent");})
                         ),
                         _ =>  {
@@ -99,7 +97,7 @@ fn main() {
                     },
                     _ => Case::C(future::err(io::Error::from(io::ErrorKind::InvalidInput)))
                 }
-            })
+            )
     });
     core.run(server).unwrap();
 }
