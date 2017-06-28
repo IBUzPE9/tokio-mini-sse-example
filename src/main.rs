@@ -10,14 +10,14 @@ use futures::{Future, Stream, Sink, future, Poll};
 use futures::future::{Loop, loop_fn};
 
 use tokio_io::AsyncRead;
+use tokio_io::io::write_all;
 use tokio_core::net::TcpListener;
 use tokio_core::reactor::{Core, Timeout};
-
 use tokio_minihttp::{Response, HttpCodec};
 
 use std::io;
+use std::io::Write;
 use std::time::Duration;
-use std::fmt::Write;
 
 // there is no way to create response without `Content-Length` header with tokio-minihttp, so let's do a little trick
 static SSE_RESP:&[u8] = b"HTTP/1.1 200 OK\r\nContent-Type: text/event-stream\r\nConnection: keep-alive\r\nAccess-Control-Allow-Origin: *\r\n\r\n";
@@ -63,30 +63,29 @@ fn main() {
                 match req {
                     Some(req) => match req.path() {
                         "/" => Case::A(
-                            tokio_io::io::write_all(transport.into_inner(), SSE_RESP)
+                            write_all(transport.into_inner(), SSE_RESP)
                                 .and_then(|(stream,_)|
-                                    loop_fn((stream, 9), |(stream, cnt)|
+                                    loop_fn((stream, 9, Vec::new()), |(stream, cnt, mut buf)|
                                         Timeout::new(Duration::from_secs(2), rht).unwrap()
-                                            .map(move |_| (stream, cnt))
-                                            .and_then(|(stream, cnt)|{
+                                            .and_then(move |_|{
                                                 let port = stream.peer_addr().map(|addr| addr.port()).unwrap_or(42) as usize;
                                                 let char = rnd(cnt + port);
                                                 let deed = rnd(char + port);
-                                                let mut buf = String::new();
+                                                buf.clear();
                                                 write!(buf, "event: userconnect\ndata: {{\"username\": \"{}\", \"status\": \"{}\"}}\n\n", LOTR_CHARS[char], LOTR_DEEDS[deed]).unwrap();
-                                                tokio_io::io::write_all(stream, buf.into_bytes())
-                                                    .and_then(move |(stream, _)|
+                                                write_all(stream, buf)
+                                                    .and_then(move |(stream, buf)|
                                                         if cnt != 0 {
-                                                            Ok(Loop::Continue((stream, cnt-1)))
+                                                            Ok(Loop::Continue((stream, cnt-1, buf)))
                                                         }else{
-                                                            Ok(Loop::Break((stream, cnt-1)))
+                                                            Ok(Loop::Break((stream, cnt-1, buf)))
                                                         }                                                    
                                                     )                                                    
                                             })  
 
                                     )
                                 )
-                                .map(|(_, _)| ())
+                                .map(|_| ())
                         ),
                         _ =>  {
                             let mut resp = Response::new();
