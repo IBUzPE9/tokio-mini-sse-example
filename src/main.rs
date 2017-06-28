@@ -97,10 +97,7 @@ fn main() {
                             Case::B(transport.send(resp).map(|_| ()))                                 
                         }
                     },
-                    _ => {
-                        println!("stream terminated");
-                        Case::C(future::err(io::Error::from(io::ErrorKind::InvalidInput)))
-                    }
+                    _ => Case::C(future::err(io::Error::from(io::ErrorKind::InvalidInput)))
                 }
             })
     });
