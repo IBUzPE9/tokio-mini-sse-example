@@ -86,7 +86,7 @@ fn main() {
 
                                     )
                                 )
-                                .map(|(_, _)| {println!("all msgs sent");})
+                                .map(|(_, _)| ())
                         ),
                         _ =>  {
                             let mut resp = Response::new();
