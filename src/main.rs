@@ -22,10 +22,6 @@ use std::fmt::Write;
 // there is no way to create response without `Content-Length` header with tokio-minihttp, so let's do a little trick
 static SSE_RESP:&[u8] = b"HTTP/1.1 200 OK\r\nContent-Type: text/event-stream\r\nConnection: keep-alive\r\nAccess-Control-Allow-Origin: *\r\n\r\n";
 
-fn rnd(x:usize) -> usize{
-    (7 * x + 13) % 10
-}
-
 static LOTR_CHARS:&[&str] = &["Frodo", "Bilbo", "Gimli", "Legolas", "Gandalf", "Sam", "Gollum", "Aragorn", "Boromir", "Galadriel"];
 static LOTR_DEEDS:&[&str] = &["wounded by King Nazgul’s blade", "leaves the Ring behind", "is fascinated by Galadriel's beauty", "hits a flying Nazgul", "overthrows Saruman and breaks his staff", "returned to the Shire", "wanders through the lands of Middle-earth", "ruled Gondor", "dies heroically", "is independent, strong and wise"];
 
@@ -46,6 +42,10 @@ where
             Case::C(ref mut c) => c.poll(),
         }
     }
+}
+
+fn rnd(x:usize) -> usize{
+    (7 * x + 13) % 10
 }
 
 fn main() {
