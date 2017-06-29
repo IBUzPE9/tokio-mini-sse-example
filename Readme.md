@@ -1,6 +1,6 @@
-#A simple server sent events example 
+# A simple server sent events example 
 
-Written in Rust using tokio-minihttp crate.
+Written in Rust using [tokio-minihttp](https://github.com/tokio-rs/tokio-minihttp) crate.
 
-Usage:
+*Usage:*
     Just start the server and open the link: http://127.0.0.1:7778/
